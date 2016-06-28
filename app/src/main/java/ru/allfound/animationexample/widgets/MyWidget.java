@@ -11,6 +11,36 @@ import android.view.View;
 public class MyWidget extends View {
 
     Paint paint;
+    private float[] datapoints = new float[] {75, 45, 140, 30, 50, 150};
+
+    private float getYPos(float value) {
+        float height = getHeight() - getPaddingTop() - getPaddingBottom();
+        float maxValue = getMax(datapoints);
+
+        value = (value / maxValue) * height;
+        value = height - value;
+        value += getPaddingTop();
+
+        return value;
+    }
+
+    private float getMax(float[] datapoints) {
+        float maxValue = 0;
+        for (float datapoint : datapoints) {
+            if (datapoint > maxValue) maxValue = datapoint;
+        }
+        return maxValue;
+    }
+
+    private float getXPos(float value) {
+        float width = getWidth() - getPaddingLeft() - getPaddingRight();
+        float maxValue = datapoints.length - 1;
+
+        value = (value / maxValue) * width;
+        value += getPaddingLeft();
+
+        return value;
+    }
 
     public MyWidget(Context context, final AttributeSet attrs) {
         super(context, attrs);
@@ -42,6 +72,24 @@ public class MyWidget extends View {
 
         paint.setColor(Color.BLUE);
         makeCircleLine(canvas, w / 2, h / 2, 150);
+
+        makeLineDiagram(canvas);
+    }
+
+    private void makeLineDiagram(Canvas canvas) {
+        Path path = new Path();
+        path.moveTo(getXPos(0), getYPos(datapoints[0]));
+        for (int i = 1; i < datapoints.length; i++) {
+            path.lineTo(getXPos(i), getYPos(datapoints[i]));
+        }
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setShadowLayer(4, 2, 2, 0x80000000);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(4);
+        paint.setColor(0xFF33B5E5);
+        canvas.drawPath(path, paint);
     }
 
     private Path makeCircleLine(Canvas canvas, float startX, float startY, int size) {
